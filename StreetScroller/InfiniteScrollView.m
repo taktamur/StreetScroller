@@ -80,7 +80,7 @@
             UILabel *label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 80)] autorelease];
             [label setNumberOfLines:3];
             [label setText:[NSString stringWithFormat:
-                            @"1024 Block Street\nShaffer, CA\n%d",i]];
+                            @"%d",i]];
             [labels addObject:label];
         }
     }
@@ -102,7 +102,7 @@
         self.contentOffset = CGPointMake(centerOffsetX, currentOffset.y);
         
         // move content by the same amount so it appears to stay still
-        for (UIView *view in visibleLabels) {
+        for (UIView *view in labelContainerView.subviews) {
             CGPoint center = [labelContainerView convertPoint:view.center toView:self];
             center.x += (centerOffsetX - currentOffset.x);
             view.center = [self convertPoint:center toView:labelContainerView];
@@ -111,7 +111,6 @@
 }
 
 - (void)layoutSubviews {
-    NSLog(@"%@",NSStringFromSelector(_cmd));
     [super layoutSubviews];
     
     [self recenterIfNecessary];
@@ -136,6 +135,31 @@
     
     return label;
 }
+
+-(UIView *)viewForRitghtOf:(UIView *)target
+{
+    if( target == nil ){
+        return [labels objectAtIndex:0];
+    }
+    NSUInteger index = [labels indexOfObject:target];
+    index++;
+    if(  [labels count] == index ){
+        index = 0;
+    }
+    return [labels objectAtIndex:index];
+}
+
+-(UIView *)viewForLeftOf:(UIView *)target
+{
+    NSUInteger index = [labels indexOfObject:target];
+    if( index == 0 ){
+        index = [labels count] -1;
+    }else{
+        index--;
+    }
+    return [labels objectAtIndex:index];
+}
+
 
 //- (CGFloat)placeNewLabelOnRight:(CGFloat)rightEdge {
 //    UIView *label = [self createLabel];
@@ -169,7 +193,8 @@
     // to kick off the tiling we need to make sure there's at least one label
     if ([visibleLabels count] == 0) {
 //        [self placeNewLabelOnRight:minimumVisibleX];
-        UIView *label = [self createLabel];
+        UIView *label = [self viewForRitghtOf:nil];
+//        UIView *label = [self createLabel];
         [labelContainerView addSubview:label];
         [visibleLabels addObject:label]; // add rightmost label at the end of the array
         
@@ -184,7 +209,8 @@
     CGFloat rightEdge = CGRectGetMaxX([lastLabel frame]);
     while (rightEdge < maximumVisibleX) {
 //        rightEdge = [self placeNewLabelOnRight:rightEdge];
-        UIView *label = [self createLabel];
+        UIView *label = [self viewForRitghtOf:lastLabel];
+//        UIView *label = [self createLabel];
         [labelContainerView addSubview:label];
         [visibleLabels addObject:label]; // add rightmost label at the end of the array
         
@@ -201,7 +227,8 @@
     CGFloat leftEdge = CGRectGetMinX([firstLabel frame]);
     while (leftEdge > minimumVisibleX) {
 //        leftEdge = [self placeNewLabelOnLeft:leftEdge];
-        UIView *label = [self createLabel];
+//        UIView *label = [self createLabel];
+        UIView *label = [self viewForLeftOf:firstLabel];
         [labelContainerView addSubview:label];
         [visibleLabels insertObject:label atIndex:0]; // add leftmost label at the beginning of the array
         
