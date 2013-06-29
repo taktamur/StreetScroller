@@ -128,13 +128,6 @@
 #pragma mark Label Tiling
 
 
-//- (UIView *)createLabel {
-//    UILabel *label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 80)] autorelease];
-//    [label setNumberOfLines:3];
-//    [label setText:@"1024 Block Street\nShaffer, CA\n95014"];
-//    
-//    return label;
-//}
 
 -(UIView *)viewForRitghtOf:(UIView *)target
 {
@@ -161,41 +154,12 @@
 }
 
 
-//- (CGFloat)placeNewLabelOnRight:(CGFloat)rightEdge {
-//    UIView *label = [self createLabel];
-//    [labelContainerView addSubview:label];
-//    [visibleLabels addObject:label]; // add rightmost label at the end of the array
-//    
-//    CGRect frame = [label frame];
-//    frame.origin.x = rightEdge;
-//    frame.origin.y = [labelContainerView bounds].size.height - frame.size.height;
-//    [label setFrame:frame];
-//        
-//    return CGRectGetMaxX(frame);
-//}
-
-//- (CGFloat)placeNewLabelOnLeft:(CGFloat)leftEdge {
-//    UIView *label = [self createLabel];
-//    [labelContainerView addSubview:label];
-//    [visibleLabels insertObject:label atIndex:0]; // add leftmost label at the beginning of the array
-//    
-//    CGRect frame = [label frame];
-//    frame.origin.x = leftEdge - frame.size.width;
-//    frame.origin.y = [labelContainerView bounds].size.height - frame.size.height;
-//    [label setFrame:frame];
-//    
-//    return CGRectGetMinX(frame);
-//}
-
 // 個々のViewを追加/削除している。
 
 - (void)tileLabelsFromMinX:(CGFloat)minimumVisibleX toMaxX:(CGFloat)maximumVisibleX {
-    // the upcoming tiling logic depends on there already being at least one label in the visibleLabels array, so
-    // to kick off the tiling we need to make sure there's at least one label
     if ([visibleLabels count] == 0) {
 // FIXME 最初に画面全てを埋めておく必要がある。
         UIView *label = [self viewForRitghtOf:nil];
-//        UIView *label = [self createLabel];
         [labelContainerView addSubview:label];
         [visibleLabels addObject:label]; // add rightmost label at the end of the array
         
@@ -209,9 +173,7 @@
     UILabel *lastLabel = [visibleLabels lastObject];
     CGFloat rightEdge = CGRectGetMaxX([lastLabel frame]);
     while (rightEdge < maximumVisibleX) {
-//        rightEdge = [self placeNewLabelOnRight:rightEdge];
         UIView *label = [self viewForRitghtOf:lastLabel];
-//        UIView *label = [self createLabel];
         [labelContainerView addSubview:label];
         [visibleLabels addObject:label]; // add rightmost label at the end of the array
         
@@ -227,8 +189,6 @@
     UILabel *firstLabel = [visibleLabels objectAtIndex:0];
     CGFloat leftEdge = CGRectGetMinX([firstLabel frame]);
     while (leftEdge > minimumVisibleX) {
-//        leftEdge = [self placeNewLabelOnLeft:leftEdge];
-//        UIView *label = [self createLabel];
         UIView *label = [self viewForLeftOf:firstLabel];
         [labelContainerView addSubview:label];
         [visibleLabels insertObject:label atIndex:0]; // add leftmost label at the beginning of the array
