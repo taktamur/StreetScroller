@@ -128,13 +128,13 @@
 #pragma mark Label Tiling
 
 
-- (UIView *)createLabel {
-    UILabel *label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 80)] autorelease];
-    [label setNumberOfLines:3];
-    [label setText:@"1024 Block Street\nShaffer, CA\n95014"];
-    
-    return label;
-}
+//- (UIView *)createLabel {
+//    UILabel *label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 80)] autorelease];
+//    [label setNumberOfLines:3];
+//    [label setText:@"1024 Block Street\nShaffer, CA\n95014"];
+//    
+//    return label;
+//}
 
 -(UIView *)viewForRitghtOf:(UIView *)target
 {
@@ -188,11 +188,12 @@
 //}
 
 // 個々のViewを追加/削除している。
+
 - (void)tileLabelsFromMinX:(CGFloat)minimumVisibleX toMaxX:(CGFloat)maximumVisibleX {
     // the upcoming tiling logic depends on there already being at least one label in the visibleLabels array, so
     // to kick off the tiling we need to make sure there's at least one label
     if ([visibleLabels count] == 0) {
-//        [self placeNewLabelOnRight:minimumVisibleX];
+// FIXME 最初に画面全てを埋めておく必要がある。
         UIView *label = [self viewForRitghtOf:nil];
 //        UIView *label = [self createLabel];
         [labelContainerView addSubview:label];
