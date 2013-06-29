@@ -62,7 +62,7 @@
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
     if ((self = [super initWithCoder:aDecoder])) {
-        self.contentSize = CGSizeMake(5000, self.frame.size.height);
+        self.contentSize = CGSizeMake(self.frame.size.width*3, self.frame.size.height);
         
         visibleLabels = [[NSMutableArray alloc] init];
         
@@ -77,10 +77,12 @@
         
         labels = [[NSMutableArray alloc]init];
         for( int i=0; i<10; i++ ){
-            UILabel *label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 80)] autorelease];
+            UILabel *label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 80)] autorelease];
             [label setNumberOfLines:3];
+            [label setTextAlignment:UITextAlignmentCenter];
             [label setText:[NSString stringWithFormat:
                             @"%d",i]];
+            label.tag = i;
             [labels addObject:label];
         }
     }
@@ -157,8 +159,8 @@
 // 個々のViewを追加/削除している。
 
 - (void)tileLabelsFromMinX:(CGFloat)minimumVisibleX toMaxX:(CGFloat)maximumVisibleX {
+    NSLog(@"min=%f,max=%f",minimumVisibleX,maximumVisibleX);
     if ([visibleLabels count] == 0) {
-// FIXME 最初に画面全てを埋めておく必要がある。
         UIView *label = [self viewForRitghtOf:nil];
         [labelContainerView addSubview:label];
         [visibleLabels addObject:label]; // add rightmost label at the end of the array
@@ -167,54 +169,62 @@
         frame.origin.x = minimumVisibleX;
         frame.origin.y = [labelContainerView bounds].size.height - frame.size.height;
         [label setFrame:frame];
+        CGPoint center = label.center;  // 中央寄せ
+        center.x = frame.origin.x + (maximumVisibleX-minimumVisibleX)/2.0;
+        [label setCenter:center];
     }
     
     // 空いた場所にlabelを追加（右側）
-    UILabel *lastLabel = [visibleLabels lastObject];
-    CGFloat rightEdge = CGRectGetMaxX([lastLabel frame]);
-    while (rightEdge < maximumVisibleX) {
-        UIView *label = [self viewForRitghtOf:lastLabel];
-        [labelContainerView addSubview:label];
-        [visibleLabels addObject:label]; // add rightmost label at the end of the array
-        
-        CGRect frame = [label frame];
-        frame.origin.x = rightEdge;
-        frame.origin.y = [labelContainerView bounds].size.height - frame.size.height;
-        [label setFrame:frame];
-        rightEdge =  CGRectGetMaxX(frame);
+    {
+        UIView *lastLabel = [visibleLabels lastObject];
+        while (CGRectGetMaxX([lastLabel frame]) < maximumVisibleX) {
+            UIView *addedView = [self viewForRitghtOf:lastLabel];
+            [labelContainerView addSubview:addedView];
+            [visibleLabels addObject:addedView];             
 
+            CGRect frame = [addedView frame];
+            frame.origin.x = CGRectGetMaxX([lastLabel frame]);
+            frame.origin.y = [labelContainerView bounds].size.height - frame.size.height;
+            [addedView setFrame:frame];
+            
+            lastLabel = addedView;
+            
+        }
     }
-    
     // 空いた場所にlabelを追加（左側）
-    UILabel *firstLabel = [visibleLabels objectAtIndex:0];
-    CGFloat leftEdge = CGRectGetMinX([firstLabel frame]);
-    while (leftEdge > minimumVisibleX) {
-        UIView *label = [self viewForLeftOf:firstLabel];
-        [labelContainerView addSubview:label];
-        [visibleLabels insertObject:label atIndex:0]; // add leftmost label at the beginning of the array
-        
-        CGRect frame = [label frame];
-        frame.origin.x = leftEdge - frame.size.width;
-        frame.origin.y = [labelContainerView bounds].size.height - frame.size.height;
-        [label setFrame:frame];
-        
-        leftEdge = CGRectGetMinX(frame);
+    {
+        UIView *firstLabel = [visibleLabels objectAtIndex:0];
+        while (CGRectGetMinX([firstLabel frame]) > minimumVisibleX) {
+            UIView *label = [self viewForLeftOf:firstLabel];
+            [labelContainerView addSubview:label];
+            [visibleLabels insertObject:label atIndex:0]; // add leftmost label at the beginning of the array
+            
+            CGRect frame = [label frame];
+            frame.origin.x = CGRectGetMinX([firstLabel frame]) - frame.size.width;
+            frame.origin.y = [labelContainerView bounds].size.height - frame.size.height;
+            [label setFrame:frame];
+            
+            firstLabel = label;
+        }
     }
-    
     // 右側からはみ出したlabelを削除
-    lastLabel = [visibleLabels lastObject];
-    while ([lastLabel frame].origin.x > maximumVisibleX) {
-        [lastLabel removeFromSuperview];
-        [visibleLabels removeLastObject];
-        lastLabel = [visibleLabels lastObject];
+    {
+        UIView *lastLabel = [visibleLabels lastObject];
+        while ([lastLabel frame].origin.x > maximumVisibleX) {
+            [lastLabel removeFromSuperview];
+            [visibleLabels removeLastObject];
+            lastLabel = [visibleLabels lastObject];
+        }
     }
     
     // 左側からはみ出したlabelを削除
-    firstLabel = [visibleLabels objectAtIndex:0];
-    while (CGRectGetMaxX([firstLabel frame]) < minimumVisibleX) {
-        [firstLabel removeFromSuperview];
-        [visibleLabels removeObjectAtIndex:0];
-        firstLabel = [visibleLabels objectAtIndex:0];
+    {
+        UIView *firstLabel = [visibleLabels objectAtIndex:0];
+        while (CGRectGetMaxX([firstLabel frame]) < minimumVisibleX) {
+            [firstLabel removeFromSuperview];
+            [visibleLabels removeObjectAtIndex:0];
+            firstLabel = [visibleLabels objectAtIndex:0];
+        }
     }
 }
 
